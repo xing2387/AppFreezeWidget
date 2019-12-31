@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+
+    <CheckBox
+        android:id="@+id/cb_system"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="system" />
+
+    <CheckBox
+        android:id="@+id/cb_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/cb_system"
+        android:text="user" />
+
+    <Button
+        android:id="@+id/btn_select_all"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_below="@id/cb_system"
+        android:padding="0dp"
+        android:text="全选" />
+
+    <Button
+        android:id="@+id/btn_un_select_all"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_below="@id/cb_system"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@id/btn_select_all"
+        android:padding="0dp"
+        android:text="全不选" />
+
+    <Button
+        android:id="@+id/add_button"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:text="@string/add_widget" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_app_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/btn_select_all" />
+
+
+</RelativeLayout>
