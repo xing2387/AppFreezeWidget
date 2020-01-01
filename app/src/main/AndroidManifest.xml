@@ -21,7 +21,7 @@
                 android:resource="@xml/my_app_widget_info" />
         </receiver>
 
-        <activity android:name="xing.test.mywidget.configure.MyAppWidgetConfigureActivity">
+        <activity android:name="xing.test.mywidget.configure.WidgetConfigureActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
@@ -29,7 +29,6 @@
         <activity android:name="xing.test.mywidget.app.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
