@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-
     <CheckBox
         android:id="@+id/cb_system"
         android:layout_width="wrap_content"
@@ -20,32 +19,40 @@
         android:layout_toEndOf="@id/cb_system"
         android:text="user" />
 
-    <Button
+    <TextView
         android:id="@+id/btn_select_all"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/cb_system"
-        android:padding="0dp"
-        android:text="全选" />
+        android:layout_margin="5dp"
+        android:padding="5dp"
+        android:text="全选"
+        android:textColor="@color/textColorPrimary" />
 
-    <Button
+    <TextView
         android:id="@+id/btn_un_select_all"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/cb_system"
+        android:layout_margin="5dp"
         android:layout_marginStart="10dp"
         android:layout_toEndOf="@id/btn_select_all"
-        android:padding="0dp"
-        android:text="全不选" />
+        android:padding="5dp"
+        android:text="全不选"
+        android:textColor="@color/textColorPrimary" />
 
-    <Button
-        android:id="@+id/add_button"
+    <TextView
+        android:id="@+id/tv_btn_done"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:text="@string/add_widget" />
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/add_widget"
+        android:textColor="@color/textColorPrimary" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <!--<androidx.recyclerview.widget.RecyclerView-->
+    <xing.test.mywidget.widget.AppList
         android:id="@+id/rv_app_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

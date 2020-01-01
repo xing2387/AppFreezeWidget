@@ -93,16 +93,16 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         }
         rv.setViewVisibility(R.id.v_mask, if (appInfo.enabled) View.GONE else View.VISIBLE)
         // Next, we set a fill-intent which will be used to fill-in the pending intent template
-// which is set on the collection view in StackWidgetProvider.
+        // which is set on the collection view in StackWidgetProvider.
         val extras = Bundle()
         extras.putString(MyAppWidget.Companion.APP_LIST, appInfo.packageName)
         val fillInIntent = Intent()
         fillInIntent.putExtras(extras)
         rv.setOnClickFillInIntent(R.id.layout_item, fillInIntent)
         // You can do heaving lifting in here, synchronously. For example, if you need to
-// process an image, fetch something from the network, etc., it is ok to do it here,
-// synchronously. A loading view will show up in lieu of the actual contents in the
-// interim.
+        // process an image, fetch something from the network, etc., it is ok to do it here,
+        // synchronously. A loading view will show up in lieu of the actual contents in the
+        // interim.
         Log.d(TAG, "getViewAt: " + appInfo.appName + " --> " + appInfo.enabled)
         // Return the remote views object.
         return rv
@@ -125,8 +125,9 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         return true
     }
 
-    override fun onDataSetChanged() { // This is triggered when you call AppWidgetManager notifyAppWidgetViewDataChanged
-// on the collection view corresponding to this factory. You can do heaving lifting in
+    override fun onDataSetChanged() {
+        // This is triggered when you call AppWidgetManager notifyAppWidgetViewDataChanged
+        // on the collection view corresponding to this factory. You can do heaving lifting in
 // here, synchronously. For example, if you need to process an image, fetch something
 // from the network, etc., it is ok to do it here, synchronously. The widget will remain
 // in its current state while work is being done here, so you don't need to worry about

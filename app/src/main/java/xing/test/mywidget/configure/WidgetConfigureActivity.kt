@@ -4,21 +4,21 @@ import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
-import android.widget.CheckBox
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_widget_configure.*
 import xing.test.mywidget.BuildConfig
 import xing.test.mywidget.R
 import xing.test.mywidget.Utils
 import xing.test.mywidget.appwidget.AppInfo
 import xing.test.mywidget.appwidget.MyAppWidget
-import xing.test.mywidget.configure.WidgetConfigureActivity
 import java.util.*
+import kotlin.collections.ArrayList
 
 class WidgetConfigureActivity : Activity() {
+
     companion object {
         private const val TAG = "MyAppWidgetConfigureAct"
         private const val EXTRA_TEST_APPWIDGET_ID = 10086
@@ -29,44 +29,26 @@ class WidgetConfigureActivity : Activity() {
         }
     }
 
-    var mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
-    var mOnClickListener = View.OnClickListener {
-        val context: Context = this@WidgetConfigureActivity
-        // When the button is clicked, store the string locally
-        Utils.savePackageNameListPref(context, mAppWidgetId, mAdapter?.selectedPackageName)
-        //            Utils.updateStateListPref(context, mAppEnableStateMap);
-// It is the responsibility of the configuration activity to update the app widget
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        MyAppWidget.Companion.updateAppWidget(context, appWidgetManager, mAppWidgetId)
-        // Make sure we pass back the original appWidgetId
-        val resultValue = Intent()
-        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId)
-        setResult(RESULT_OK, resultValue)
-        finish()
-    }
-    private var mIncludeSystemApp = false
-    private var mIncludeUserApp = true
-    private val mAppInfoList: MutableList<AppInfo> = ArrayList()
-    private val mAppEnableStateMap = HashMap<String, Boolean>()
-    private var mCbSystemApp: CheckBox? = null
-    private var mCbUserApp: CheckBox? = null
-    private var mRvAppList: RecyclerView? = null
-    private var mAdapter: AppListAdapter? = null
+    private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+
+    private var includeSystemApp = false
+    private var includeUserApp = true
+
     public override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
         setContentView(R.layout.activity_widget_configure)
         // Set the result to CANCELED.  This will cause the widget host to cancel
-// out of the widget placement if the user presses the back button.
+        // out of the widget placement if the user presses the back button.
         setResult(RESULT_CANCELED)
         // Find the widget id from the intent.
         val intent = intent
         val extras = intent.extras
         if (extras != null) {
-            mAppWidgetId = extras.getInt(
+            appWidgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         }
         // If this activity was started with an intent without an app widget ID, finish with an error.
-        if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish()
             return
         }
@@ -75,46 +57,53 @@ class WidgetConfigureActivity : Activity() {
     }
 
     private fun updateAppList() {
-        getPackageList(this, mIncludeSystemApp, mIncludeUserApp)
+        val appInfoList = getPackageList(this, includeSystemApp, includeUserApp)
+        rv_app_list.setData(appInfoList)
     }
 
     private fun initData() {
         updateAppList()
-        mAdapter = AppListAdapter(this, mAppInfoList)
-        mRvAppList!!.adapter = mAdapter
     }
 
     private fun initView() {
-        findViews()
-        findViewById<View>(R.id.add_button).setOnClickListener(mOnClickListener)
-        mCbSystemApp!!.isChecked = mIncludeSystemApp
-        mCbUserApp!!.isChecked = mIncludeUserApp
-        mRvAppList!!.layoutManager = GridLayoutManager(this, 4)
-        mCbSystemApp!!.setOnCheckedChangeListener { buttonView, isChecked ->
-            mIncludeSystemApp = isChecked
-            updateAppList()
-            mAdapter!!.notifyDataSetChanged()
+        btn_select_all.setOnClickListener { rv_app_list.selectAll() }
+        btn_un_select_all.setOnClickListener { rv_app_list.unSelectAll() }
+        tv_btn_done.setOnClickListener {
+            val context: Context = this@WidgetConfigureActivity
+            // When the button is clicked, store the string locally
+            Utils.savePackageNameListPref(context, appWidgetId, rv_app_list.getSelectedPackageName())
+            // It is the responsibility of the configuration activity to update the app widget
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            MyAppWidget.Companion.updateAppWidget(context, appWidgetManager, appWidgetId)
+            // Make sure we pass back the original appWidgetId
+            val resultValue = Intent()
+            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            setResult(RESULT_OK, resultValue)
+            finish()
         }
-        mCbUserApp!!.setOnCheckedChangeListener { buttonView, isChecked ->
-            mIncludeUserApp = isChecked
+
+        cb_system.isChecked = includeSystemApp
+        cb_user.isChecked = includeUserApp
+        rv_app_list.layoutManager = GridLayoutManager(this, 4)
+        cb_system.setOnCheckedChangeListener { buttonView, isChecked ->
+            includeSystemApp = isChecked
             updateAppList()
-            mAdapter!!.notifyDataSetChanged()
+        }
+        cb_user.setOnCheckedChangeListener { buttonView, isChecked ->
+            includeUserApp = isChecked
+            updateAppList()
         }
     }
 
-    private fun findViews() {
-        mCbSystemApp = findViewById(R.id.cb_system)
-        mCbUserApp = findViewById(R.id.cb_user)
-        mRvAppList = findViewById(R.id.rv_app_list)
-        findViewById<View>(R.id.btn_select_all).setOnClickListener { mAdapter!!.selectAll() }
-        findViewById<View>(R.id.btn_un_select_all).setOnClickListener { mAdapter!!.unSelectAll() }
-    }
+    private var packageInfoList: List<PackageInfo> = Collections.emptyList()
 
-    private fun getPackageList(context: Context, includeSystemApp: Boolean, includeUserApp: Boolean) {
-        mAppInfoList.clear()
+    private fun getPackageList(context: Context, includeSystemApp: Boolean, includeUserApp: Boolean): List<AppInfo> {
         val pm = context.packageManager
-        val packageInfoList = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
+        if (packageInfoList.isNullOrEmpty()) {
+            packageInfoList = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
+        }
         var index = 0
+        val resultList = ArrayList<AppInfo>()
         for (packageInfo in packageInfoList) {
             val applicationInfo = packageInfo.applicationInfo
             if (BuildConfig.APPLICATION_ID == applicationInfo.packageName) {
@@ -127,11 +116,11 @@ class WidgetConfigureActivity : Activity() {
                 val appIcon = pm.getApplicationIcon(applicationInfo)
                 val appInfo = AppInfo(appName, packageName, appIcon)
                 appInfo.enabled = applicationInfo.enabled
-                mAppInfoList.add(appInfo)
-                mAppEnableStateMap[packageName] = appInfo.enabled
+                resultList.add(appInfo)
                 index++
             }
         }
+        return resultList
     }
 
 }

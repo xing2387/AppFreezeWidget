@@ -28,7 +28,7 @@ object Utils {
         prefs.commit()
     }
 
-    fun savePackageNameListPref(context: Context, appWidgetId: Int, packageNameList: HashSet<String?>?) {
+    fun savePackageNameListPref(context: Context, appWidgetId: Int, packageNameList: Set<String?>?) {
         val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
         prefs.putStringSet(PREF_PREFIX_KEY_PACKAGE_NAME + appWidgetId, packageNameList)
         prefs.commit()
