@@ -6,14 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.os.AsyncTask
 import android.os.Bundle
-import androidx.recyclerview.widget.GridLayoutManager
+import android.util.Log
 import kotlinx.android.synthetic.main.activity_widget_configure.*
 import xing.test.mywidget.BuildConfig
 import xing.test.mywidget.R
 import xing.test.mywidget.Utils
 import xing.test.mywidget.appwidget.AppInfo
 import xing.test.mywidget.appwidget.MyAppWidget
+import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -56,8 +58,7 @@ class WidgetConfigureActivity : Activity() {
         initData()
     }
 
-    private fun updateAppList() {
-        val appInfoList = getPackageList(this, includeSystemApp, includeUserApp)
+    private fun onAppListGet(appInfoList: List<AppInfo>) {
         rv_app_list.setData(appInfoList)
     }
 
@@ -84,7 +85,6 @@ class WidgetConfigureActivity : Activity() {
 
         cb_system.isChecked = includeSystemApp
         cb_user.isChecked = includeUserApp
-        rv_app_list.layoutManager = GridLayoutManager(this, 4)
         cb_system.setOnCheckedChangeListener { buttonView, isChecked ->
             includeSystemApp = isChecked
             updateAppList()
@@ -93,34 +93,77 @@ class WidgetConfigureActivity : Activity() {
             includeUserApp = isChecked
             updateAppList()
         }
+        cb_grid.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) rv_app_list.showInGrids() else rv_app_list.showInRows()
+        }
     }
 
-    private var packageInfoList: List<PackageInfo> = Collections.emptyList()
-
-    private fun getPackageList(context: Context, includeSystemApp: Boolean, includeUserApp: Boolean): List<AppInfo> {
-        val pm = context.packageManager
-        if (packageInfoList.isNullOrEmpty()) {
-            packageInfoList = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES)
-        }
-        var index = 0
-        val resultList = ArrayList<AppInfo>()
-        for (packageInfo in packageInfoList) {
-            val applicationInfo = packageInfo.applicationInfo
-            if (BuildConfig.APPLICATION_ID == applicationInfo.packageName) {
-                continue
-            }
-            val isSystemApp = Utils.isSystemApp(packageInfo)
-            if (includeSystemApp && isSystemApp || includeUserApp && !isSystemApp) {
-                val appName = pm.getApplicationLabel(applicationInfo).toString()
-                val packageName = packageInfo.packageName
-                val appIcon = pm.getApplicationIcon(applicationInfo)
-                val appInfo = AppInfo(appName, packageName, appIcon)
-                appInfo.enabled = applicationInfo.enabled
-                resultList.add(appInfo)
-                index++
-            }
-        }
-        return resultList
+    private fun updateAppList() {
+        val param = PackageFilterParam(system = includeSystemApp, user = includeUserApp)
+        AddPackageListTask(this).execute(param)
     }
 
+
+    private class AddPackageListTask(activity: WidgetConfigureActivity) : AsyncTask<PackageFilterParam, Int, List<AppInfo>>() {
+
+        companion object {
+            private val packageInfoList: MutableList<PackageInfo> = ArrayList()
+        }
+
+        private var ui: WeakReference<WidgetConfigureActivity>? = null
+
+        init {
+            ui = WeakReference(activity)
+        }
+
+        override fun doInBackground(vararg params: PackageFilterParam): List<AppInfo> {
+            val param = params[0]
+            return getPackageList(ui?.get(), param.system, param.user)
+        }
+
+        override fun onProgressUpdate(vararg values: Int?) {
+        }
+
+        override fun onPostExecute(result: List<AppInfo>) {
+            ui?.get()?.onAppListGet(result)
+        }
+
+        private fun getPackageList(context: Context?, includeSystemApp: Boolean, includeUserApp: Boolean): List<AppInfo> {
+            if (context == null) {
+                return ArrayList(0)
+            }
+            val pm = context.packageManager
+            val startT = System.currentTimeMillis()
+            if (packageInfoList.isEmpty()) {
+                packageInfoList.addAll(pm.getInstalledPackages(PackageManager.GET_ACTIVITIES))
+                val dT = System.currentTimeMillis() - startT
+                Log.d(TAG, "getInstalledPackages $dT")
+            }
+            var index = 0
+            val resultList = ArrayList<AppInfo>()
+            for (packageInfo in packageInfoList) {
+                val applicationInfo = packageInfo.applicationInfo
+                if (BuildConfig.APPLICATION_ID == applicationInfo.packageName) {
+                    continue
+                }
+                val isSystemApp = Utils.isSystemApp(packageInfo)
+                if (includeSystemApp && isSystemApp || includeUserApp && !isSystemApp) {
+                    val appName = pm.getApplicationLabel(applicationInfo).toString()
+                    val packageName = packageInfo.packageName
+                    val appIcon = pm.getApplicationIcon(applicationInfo)
+                    val appInfo = AppInfo(appName, packageName, appIcon)
+                    appInfo.enabled = applicationInfo.enabled
+                    resultList.add(appInfo)
+                    index++
+                }
+            }
+            val dT = System.currentTimeMillis() - startT
+            Log.d(TAG, "addPackageList $dT")
+            return resultList
+        }
+    }
 }
+
+internal data class PackageFilterParam(val system: Boolean = false, val user: Boolean = false,
+                                       val enabled: Boolean = true, val disabled: Boolean = false,
+                                       val labels: List<String> = Collections.emptyList())

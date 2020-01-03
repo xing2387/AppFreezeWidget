@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -9,7 +10,8 @@
         android:id="@+id/cb_system"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="system" />
+        android:layout_alignParentStart="true"
+        android:text="system " />
 
     <CheckBox
         android:id="@+id/cb_user"
@@ -19,11 +21,45 @@
         android:layout_toEndOf="@id/cb_system"
         android:text="user" />
 
+    <CheckBox
+        android:id="@+id/cb_grid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/cb_user"
+        android:text="showInGrid" />
+
+    <CheckBox
+        android:id="@+id/cb_enabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cb_system"
+        android:layout_alignParentStart="true"
+        android:text="enabled" />
+
+    <CheckBox
+        android:id="@+id/cb_disabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cb_system"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/cb_enabled"
+        android:text="disabled" />
+
+    <CheckBox
+        android:id="@+id/cb_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cb_system"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/cb_disabled"
+        android:text="labels" />
+
     <TextView
         android:id="@+id/btn_select_all"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/cb_system"
+        android:layout_below="@id/cb_enabled"
         android:layout_margin="5dp"
         android:padding="5dp"
         android:text="全选"
@@ -33,7 +69,7 @@
         android:id="@+id/btn_un_select_all"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/cb_system"
+        android:layout_below="@id/cb_enabled"
         android:layout_margin="5dp"
         android:layout_marginStart="10dp"
         android:layout_toEndOf="@id/btn_select_all"
@@ -56,7 +92,8 @@
         android:id="@+id/rv_app_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/btn_select_all" />
+        android:layout_below="@id/btn_select_all"
+        app:al_isGrid="false" />
 
 
 </RelativeLayout>
