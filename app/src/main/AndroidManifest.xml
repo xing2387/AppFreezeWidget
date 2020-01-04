@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="xing.test.mywidget">
+    package="xing.appwidget">
 
     <application
         android:allowBackup="true"
@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <receiver android:name="xing.test.mywidget.appwidget.MyAppWidget">
+        <receiver android:name="xing.appwidget.MyAppWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -21,12 +21,12 @@
                 android:resource="@xml/my_app_widget_info" />
         </receiver>
 
-        <activity android:name="xing.test.mywidget.configure.WidgetConfigureActivity">
+        <activity android:name="xing.appwidget.activity.WidgetConfigureActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
-        <activity android:name="xing.test.mywidget.app.MainActivity">
+        <activity android:name="xing.appwidget.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -34,7 +34,7 @@
         </activity>
 
         <service
-            android:name="xing.test.mywidget.appwidget.StackWidgetService"
+            android:name="xing.appwidget.service.StackWidgetService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>

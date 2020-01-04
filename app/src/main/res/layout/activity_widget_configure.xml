@@ -88,7 +88,7 @@
         android:textColor="@color/textColorPrimary" />
 
     <!--<androidx.recyclerview.widget.RecyclerView-->
-    <xing.test.mywidget.widget.AppList
+    <xing.appwidget.widget.AppList
         android:id="@+id/rv_app_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

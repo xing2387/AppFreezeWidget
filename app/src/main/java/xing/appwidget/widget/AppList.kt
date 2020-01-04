@@ -1,8 +1,7 @@
-package xing.test.mywidget.widget
+package xing.appwidget.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.PrintStreamPrinter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,8 +9,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_configure_app_linear.view.*
-import xing.test.mywidget.R
-import xing.test.mywidget.appwidget.AppInfo
+import xing.appwidget.R
+import xing.appwidget.bean.AppInfo
 
 class AppList : RecyclerView {
 

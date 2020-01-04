@@ -1,14 +1,12 @@
-package xing.test.mywidget
+package xing.appwidget.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import java.util.*
 
 @SuppressLint("ApplySharedPref")
-object Utils {
-    const val PREFS_MAIN = "xing.test.mywidget.appwidget.MyAppWidget"
+object SharedPreferenceHelper {
+    const val PREFS_MAIN = "xing.appwidget.MyAppWidget"
     const val PREFS_LABELS = "labels"
     const val PREF_PREFIX_KEY_PACKAGE_NAME = "appwidget_packagenames_"
     const val PREF_PREFIX_KEY_EDIT_MODE = "appwidget_edit_mode_"
@@ -47,6 +45,7 @@ object Utils {
     fun loadEditModePref(context: Context, appWidgetId: Int) =
             getMainPref(context).getBoolean(PREF_PREFIX_KEY_EDIT_MODE + appWidgetId, true)
 
+    /*-----------   标签相关  start -------------*/
     fun getLabelPref(context: Context) = context.getSharedPreferences(PREFS_LABELS, Context.MODE_PRIVATE)
 
     fun saveLabelPref(context: Context, label: String, packageNameSet: Set<String>) =
@@ -54,16 +53,6 @@ object Utils {
 
     fun getLabelContent(context: Context, label: String) =
             getLabelPref(context).getStringSet(label, Collections.emptySet())
+    /*-----------   标签相关  end -------------*/
 
-    fun isSystemApp(pInfo: PackageInfo): Boolean { //判断是否是系统软件
-        return pInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
-    }
-
-    fun isSystemUpdateApp(pInfo: PackageInfo): Boolean { //判断是否是软件更新..
-        return pInfo.applicationInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0
-    }
-
-    fun isUserApp(pInfo: PackageInfo): Boolean { //是否是系统软件或者是系统软件更新
-        return !isSystemApp(pInfo) && !isSystemUpdateApp(pInfo)
-    }
 }

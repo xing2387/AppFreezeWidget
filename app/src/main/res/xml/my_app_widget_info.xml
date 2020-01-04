@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:configure="xing.test.mywidget.configure.WidgetConfigureActivity"
+    android:configure="xing.appwidget.activity.WidgetConfigureActivity"
     android:initialKeyguardLayout="@layout/my_app_widget"
     android:initialLayout="@layout/my_app_widget"
     android:minWidth="200dp"

@@ -1,4 +1,4 @@
-package xing.test.mywidget.appwidget
+package xing.appwidget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -10,9 +10,9 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.widget.RemoteViews
-import xing.test.mywidget.R
-import xing.test.mywidget.Utils
-import xing.test.mywidget.configure.WidgetConfigureActivity
+import xing.appwidget.service.StackWidgetService
+import xing.appwidget.activity.WidgetConfigureActivity
+import xing.appwidget.utils.SharedPreferenceHelper
 import java.io.DataOutputStream
 
 /**
@@ -29,7 +29,7 @@ class MyAppWidget : AppWidgetProvider() {
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) { // When the user deletes the widget, delete the preference associated with it.
         for (appWidgetId in appWidgetIds) {
-            Utils.deletePackageNameListPref(context, appWidgetId)
+            SharedPreferenceHelper.deletePackageNameListPref(context, appWidgetId)
         }
     }
 
@@ -57,7 +57,7 @@ class MyAppWidget : AppWidgetProvider() {
                 }
                 if (applicationInfo != null) {
                     sbCmd.append("pm " + (if (!applicationInfo.enabled) "enable " else "disable ") + name + ";")
-                    Utils.saveEnableState(context, name, !applicationInfo.enabled)
+                    SharedPreferenceHelper.saveEnableState(context, name, !applicationInfo.enabled)
                 }
             }
             rootCommand(sbCmd.toString())
@@ -66,8 +66,8 @@ class MyAppWidget : AppWidgetProvider() {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.grid_view)
         } else if (EDIT_ACTION == intent.action) {
-            val isEditMode = Utils.loadEditModePref(context, appWidgetId)
-            Utils.setEditModePref(context, appWidgetId, !isEditMode)
+            val isEditMode = SharedPreferenceHelper.loadEditModePref(context, appWidgetId)
+            SharedPreferenceHelper.setEditModePref(context, appWidgetId, !isEditMode)
             val appWidgetManager = AppWidgetManager.getInstance(context)
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.grid_view)
         }
@@ -98,9 +98,9 @@ class MyAppWidget : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, rv)
         }
 
-        const val SWITCH_ACTION = "xing.test.mywidget.SWITCH_ACTION"
-        const val EDIT_ACTION = "xing.test.mywidget.EDIT_ACTION"
-        const val APP_LIST = "xing.test.mywidget.APP_LIST"
+        const val SWITCH_ACTION = "xing.appwidget.SWITCH_ACTION"
+        const val EDIT_ACTION = "xing.appwidget.EDIT_ACTION"
+        const val APP_LIST = "xing.appwidget.APP_LIST"
         fun rootCommand(command: String): Boolean {
             var process: Process? = null
             var os: DataOutputStream? = null

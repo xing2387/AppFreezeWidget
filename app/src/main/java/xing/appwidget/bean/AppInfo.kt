@@ -1,4 +1,4 @@
-package xing.test.mywidget.appwidget
+package xing.appwidget.bean
 
 import android.graphics.drawable.Drawable
 

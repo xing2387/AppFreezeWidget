@@ -1,4 +1,4 @@
-package xing.test.mywidget.appwidget
+package xing.appwidget.service
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -14,8 +14,10 @@ import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import android.widget.RemoteViewsService.RemoteViewsFactory
-import xing.test.mywidget.R
-import xing.test.mywidget.Utils
+import xing.appwidget.MyAppWidget
+import xing.appwidget.R
+import xing.appwidget.utils.SharedPreferenceHelper
+import xing.appwidget.bean.AppInfo
 import java.util.*
 
 class StackWidgetService : RemoteViewsService() {
@@ -34,7 +36,7 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
 // for example downloading or creating content etc, should be deferred to onDataSetChanged()
 // or getViewAt(). Taking more than 20 seconds in this call will result in an ANR.
         mAppInfoList.clear()
-        val packages = Utils.loadPackageNameListPref(mContext, mAppWidgetId)
+        val packages = SharedPreferenceHelper.loadPackageNameListPref(mContext, mAppWidgetId)
         Log.d(TAG, "onCreate: $mAppWidgetId,$packages")
         val pm = mContext.packageManager
         val applicationInfoList = pm.getInstalledApplications(0)
@@ -95,7 +97,7 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         // Next, we set a fill-intent which will be used to fill-in the pending intent template
         // which is set on the collection view in StackWidgetProvider.
         val extras = Bundle()
-        extras.putString(MyAppWidget.Companion.APP_LIST, appInfo.packageName)
+        extras.putString(MyAppWidget.APP_LIST, appInfo.packageName)
         val fillInIntent = Intent()
         fillInIntent.putExtras(extras)
         rv.setOnClickFillInIntent(R.id.layout_item, fillInIntent)
@@ -132,9 +134,9 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
 // from the network, etc., it is ok to do it here, synchronously. The widget will remain
 // in its current state while work is being done here, so you don't need to worry about
 // locking up the widget.
-        mIsEditMode = Utils.loadEditModePref(mContext, mAppWidgetId)
+        mIsEditMode = SharedPreferenceHelper.loadEditModePref(mContext, mAppWidgetId)
         for (info in mAppInfoList) {
-            info.enabled = Utils.getEnableState(mContext, info.packageName)
+            info.enabled = SharedPreferenceHelper.getEnableState(mContext, info.packageName)
         }
     }
 

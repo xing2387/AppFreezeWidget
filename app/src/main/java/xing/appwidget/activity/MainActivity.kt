@@ -1,9 +1,8 @@
-package xing.test.mywidget.app
+package xing.appwidget.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import xing.test.mywidget.R
-import xing.test.mywidget.configure.WidgetConfigureActivity
+import xing.appwidget.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

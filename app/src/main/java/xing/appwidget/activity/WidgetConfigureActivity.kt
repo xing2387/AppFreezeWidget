@@ -1,4 +1,4 @@
-package xing.test.mywidget.configure
+package xing.appwidget.activity
 
 import android.app.Activity
 import android.appwidget.AppWidgetManager
@@ -10,11 +10,12 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_widget_configure.*
-import xing.test.mywidget.BuildConfig
-import xing.test.mywidget.R
-import xing.test.mywidget.Utils
-import xing.test.mywidget.appwidget.AppInfo
-import xing.test.mywidget.appwidget.MyAppWidget
+import xing.appwidget.BuildConfig
+import xing.appwidget.R
+import xing.appwidget.utils.SharedPreferenceHelper
+import xing.appwidget.bean.AppInfo
+import xing.appwidget.MyAppWidget
+import xing.appwidget.utils.Utils
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.collections.ArrayList
@@ -72,7 +73,7 @@ class WidgetConfigureActivity : Activity() {
         tv_btn_done.setOnClickListener {
             val context: Context = this@WidgetConfigureActivity
             // When the button is clicked, store the string locally
-            Utils.savePackageNameListPref(context, appWidgetId, rv_app_list.getSelectedPackageName())
+            SharedPreferenceHelper.savePackageNameListPref(context, appWidgetId, rv_app_list.getSelectedPackageName())
             // It is the responsibility of the configuration activity to update the app widget
             val appWidgetManager = AppWidgetManager.getInstance(context)
             MyAppWidget.Companion.updateAppWidget(context, appWidgetManager, appWidgetId)
