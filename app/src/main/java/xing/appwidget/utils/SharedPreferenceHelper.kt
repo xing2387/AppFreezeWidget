@@ -3,6 +3,7 @@ package xing.appwidget.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import java.util.*
+import kotlin.collections.HashSet
 
 @SuppressLint("ApplySharedPref")
 object SharedPreferenceHelper {
@@ -10,6 +11,7 @@ object SharedPreferenceHelper {
     const val PREFS_LABELS = "labels"
     const val PREF_PREFIX_KEY_PACKAGE_NAME = "appwidget_packagenames_"
     const val PREF_PREFIX_KEY_EDIT_MODE = "appwidget_edit_mode_"
+    const val PREF_PREFIX_KEY_LABLES = "appwidget_labels"
 
     fun updateStateListPref(context: Context, enableStateMap: HashMap<String?, Boolean?>) {
         val prefs = context.getSharedPreferences(PREFS_MAIN, 0).edit()
@@ -52,7 +54,13 @@ object SharedPreferenceHelper {
             getLabelPref(context).edit().putStringSet(label, packageNameSet).commit()
 
     fun getLabelContent(context: Context, label: String) =
-            getLabelPref(context).getStringSet(label, Collections.emptySet())
+            getLabelPref(context).getStringSet(label, Collections.emptySet()) as MutableSet<String>
+
+    fun getLabelSet(context: Context) =
+            getLabelPref(context).getStringSet(PREF_PREFIX_KEY_LABLES, HashSet<String>()) as MutableSet<String>
+
+    fun saveLabelSet(context: Context, labels: Set<String>) =
+            getLabelPref(context).edit().putStringSet(PREF_PREFIX_KEY_LABLES, labels).commit()
     /*-----------   标签相关  end -------------*/
 
 }

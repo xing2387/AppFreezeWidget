@@ -149,7 +149,6 @@ internal class AppInfoHolder(context: Context, parent: ViewGroup?, isGrid: Boole
         itemView.setOnClickListener(this)
     }
 
-
     internal interface OnItemCheckedListener {
         fun onCheckedChanged(isChecked: Boolean, packageName: String?)
     }
