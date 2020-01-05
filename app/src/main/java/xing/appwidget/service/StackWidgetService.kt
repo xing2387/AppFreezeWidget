@@ -16,8 +16,8 @@ import android.widget.RemoteViewsService
 import android.widget.RemoteViewsService.RemoteViewsFactory
 import xing.appwidget.MyAppWidget
 import xing.appwidget.R
-import xing.appwidget.utils.SharedPreferenceHelper
 import xing.appwidget.bean.AppInfo
+import xing.appwidget.utils.SharedPreferenceHelper
 import java.util.*
 
 class StackWidgetService : RemoteViewsService() {
@@ -27,14 +27,26 @@ class StackWidgetService : RemoteViewsService() {
 }
 
 internal class StackRemoteViewsFactory(private val mContext: Context, intent: Intent) : RemoteViewsFactory {
+    companion object {
+        private const val TAG = "StackRemoteViewsFactory"
+    }
+
     private val mAppWidgetId: Int
     private val mIconSize: Int
     private var mIsEditMode = false
     private val mPackageNameList = HashSet<String>()
     private val mAppInfoList = ArrayList<AppInfo>()
-    override fun onCreate() { // In onCreate() you setup any connections / cursors to your data source. Heavy lifting,
-// for example downloading or creating content etc, should be deferred to onDataSetChanged()
-// or getViewAt(). Taking more than 20 seconds in this call will result in an ANR.
+
+    init {
+        mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID)
+        mIconSize = mContext.resources.getDimensionPixelSize(android.R.dimen.app_icon_size)
+    }
+
+    override fun onCreate() {
+        // In onCreate() you setup any connections / cursors to your data source. Heavy lifting,
+        // for example downloading or creating content etc, should be deferred to onDataSetChanged()
+        // or getViewAt(). Taking more than 20 seconds in this call will result in an ANR.
         mAppInfoList.clear()
         val packages = SharedPreferenceHelper.loadPackageNameListPref(mContext, mAppWidgetId)
         Log.d(TAG, "onCreate: $mAppWidgetId,$packages")
@@ -53,8 +65,8 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         }
         Log.d(TAG, "onCreate: $mAppInfoList")
         // We sleep for 3 seconds here to show how the empty view appears in the interim.
-// The empty view is set in the StackWidgetProvider and should be a sibling of the
-// collection view.
+        // The empty view is set in the StackWidgetProvider and should be a sibling of the
+        // collection view.
         try {
             Thread.sleep(3000)
         } catch (e: InterruptedException) {
@@ -62,9 +74,10 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         }
     }
 
-    override fun onDestroy() { // In onDestroy() you should tear down anything that was setup for your data source,
-// eg. cursors, connections, etc.
-//        mWidgetItems.clear();
+    override fun onDestroy() {
+        // In onDestroy() you should tear down anything that was setup for your data source,
+        // eg. cursors, connections, etc.
+        //        mWidgetItems.clear();
     }
 
     override fun getCount(): Int {
@@ -72,9 +85,10 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         return mAppInfoList.size
     }
 
-    override fun getViewAt(position: Int): RemoteViews { // position will always range from 0 to getCount() - 1.
-// We construct a remote views item based on our widget item xml file, and set the
-// text based on the position.
+    override fun getViewAt(position: Int): RemoteViews {
+        // position will always range from 0 to getCount() - 1.
+        // We construct a remote views item based on our widget item xml file, and set the
+        // text based on the position.
         val appInfo = mAppInfoList[position]
         val rv = RemoteViews(mContext.packageName, R.layout.item_widget_app)
         rv.setTextViewText(R.id.tv_name, appInfo.appName)
@@ -110,8 +124,9 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         return rv
     }
 
-    override fun getLoadingView(): RemoteViews? { // You can create a custom loading view (for instance when getViewAt() is slow.) If you
-// return null here, you will get the default loading view.
+    override fun getLoadingView(): RemoteViews? {
+        // You can create a custom loading view (for instance when getViewAt() is slow.) If you
+        // return null here, you will get the default loading view.
         return null
     }
 
@@ -130,23 +145,14 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
     override fun onDataSetChanged() {
         // This is triggered when you call AppWidgetManager notifyAppWidgetViewDataChanged
         // on the collection view corresponding to this factory. You can do heaving lifting in
-// here, synchronously. For example, if you need to process an image, fetch something
-// from the network, etc., it is ok to do it here, synchronously. The widget will remain
-// in its current state while work is being done here, so you don't need to worry about
-// locking up the widget.
+        // here, synchronously. For example, if you need to process an image, fetch something
+        // from the network, etc., it is ok to do it here, synchronously. The widget will remain
+        // in its current state while work is being done here, so you don't need to worry about
+        // locking up the widget.
         mIsEditMode = SharedPreferenceHelper.loadEditModePref(mContext, mAppWidgetId)
         for (info in mAppInfoList) {
             info.enabled = SharedPreferenceHelper.getEnableState(mContext, info.packageName)
         }
     }
 
-    companion object {
-        private const val TAG = "StackRemoteViewsFactory"
-    }
-
-    init {
-        mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID)
-        mIconSize = mContext.resources.getDimensionPixelSize(android.R.dimen.app_icon_size)
-    }
 }
