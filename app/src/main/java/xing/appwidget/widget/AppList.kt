@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_configure_app_linear.view.*
 import xing.appwidget.R
+import xing.appwidget.bean.PackageFilterParam
 import xing.appwidget.bean.AppInfo
 
 class AppList : RecyclerView {
@@ -37,11 +38,11 @@ class AppList : RecyclerView {
         adapter.setStyle(false)
     }
 
-    fun setData(appInfoList: List<AppInfo>?) {
+    fun setData(appInfoList: Collection<AppInfo>?) {
         adapter.setData(appInfoList)
     }
 
-    fun getSelectedPackageName(): Set<String?> {
+    fun getSelectedPackageName(): Set<String> {
         return adapter.selectedPackageName
     }
 
@@ -52,24 +53,40 @@ class AppList : RecyclerView {
     fun unSelectAll() {
         adapter.unSelectAll()
     }
+
+    fun setEdieMode(enable: Boolean) {
+        adapter.setEditMode(enable)
+    }
 }
 
 internal class AppListAdapter(private val context: Context, private var isGrid: Boolean = true) :
         RecyclerView.Adapter<RecyclerView.ViewHolder>(), AppInfoHolder.OnItemCheckedListener {
 
     private val appInfoList: MutableList<AppInfo> = ArrayList()
-    val selectedPackageName = HashSet<String?>()
+    val selectedPackageName = HashSet<String>()
+    private var editMode: Boolean = true
 
     fun setStyle(isGrid: Boolean) {
         this.isGrid = isGrid
         notifyDataSetChanged()
     }
 
-    fun setData(appInfoList: List<AppInfo>?) {
+    fun setData(appInfoList: Collection<AppInfo>?) {
 
         this.appInfoList.clear()
         if (!appInfoList.isNullOrEmpty()) {
             this.appInfoList.addAll(appInfoList)
+        }
+        notifyDataSetChanged()
+    }
+
+    fun setEditMode(editMode: Boolean) {
+        if (this.editMode == editMode) {
+            return
+        }
+        this.editMode = editMode
+        if (!editMode) {
+            selectedPackageName.clear()
         }
         notifyDataSetChanged()
     }
@@ -88,6 +105,7 @@ internal class AppListAdapter(private val context: Context, private var isGrid: 
         if (viewHolder is AppInfoHolder && appInfoList.size > i) {
             val appInfo = appInfoList[i]
             val isChecked = selectedPackageName.contains(appInfo.packageName)
+            viewHolder.setEditMode(editMode)
             viewHolder.bindView(appInfo, isChecked)
         }
     }
@@ -97,6 +115,9 @@ internal class AppListAdapter(private val context: Context, private var isGrid: 
     }
 
     override fun onCheckedChanged(isChecked: Boolean, packageName: String?) {
+        if (packageName.isNullOrBlank()) {
+            return
+        }
         if (isChecked) {
             selectedPackageName.add(packageName)
         } else {
@@ -134,8 +155,28 @@ internal class AppInfoHolder(context: Context, parent: ViewGroup?, isGrid: Boole
         }
     }
 
+    private var editMode: Boolean = true
     private var appInfo: AppInfo? = null
     var onItemCheckedListener: OnItemCheckedListener? = null
+
+    init {
+        itemView.cb_check.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (editMode) {
+                onItemCheckedListener?.onCheckedChanged(isChecked, appInfo?.packageName)
+            }
+        }
+    }
+
+    fun setEditMode(editMode: Boolean) {
+        if (this.editMode == editMode) {
+            return
+        }
+        if (editMode) {
+            itemView.cb_check.visibility = View.VISIBLE
+        } else {
+            itemView.cb_check.visibility = View.GONE
+        }
+    }
 
     fun bindView(appInfo: AppInfo?, isChecked: Boolean) {
         this.appInfo = appInfo
@@ -149,17 +190,14 @@ internal class AppInfoHolder(context: Context, parent: ViewGroup?, isGrid: Boole
         itemView.setOnClickListener(this)
     }
 
-    internal interface OnItemCheckedListener {
-        fun onCheckedChanged(isChecked: Boolean, packageName: String?)
-    }
-
     override fun onClick(v: View?) {
+        if (!editMode) {
+            return
+        }
         itemView.cb_check.isChecked = !itemView.cb_check.isChecked
     }
 
-    init {
-        itemView.cb_check.setOnCheckedChangeListener { buttonView, isChecked ->
-            onItemCheckedListener?.onCheckedChanged(isChecked, appInfo?.packageName)
-        }
+    internal interface OnItemCheckedListener {
+        fun onCheckedChanged(isChecked: Boolean, packageName: String?)
     }
 }

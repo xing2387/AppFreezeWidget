@@ -26,4 +26,14 @@
         android:text="app列表"
         app:layout_constraintTop_toBottomOf="@id/tv_labels" />
 
+    <TextView
+        android:id="@+id/tv_create_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="添加标签"
+        app:layout_constraintTop_toBottomOf="@id/tv_apps" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

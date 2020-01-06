@@ -1,4 +1,4 @@
-package xing.appwidget.utils
+package xing.appwidget.storage
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -47,20 +47,5 @@ object SharedPreferenceHelper {
     fun loadEditModePref(context: Context, appWidgetId: Int) =
             getMainPref(context).getBoolean(PREF_PREFIX_KEY_EDIT_MODE + appWidgetId, true)
 
-    /*-----------   标签相关  start -------------*/
-    fun getLabelPref(context: Context) = context.getSharedPreferences(PREFS_LABELS, Context.MODE_PRIVATE)
-
-    fun saveLabelPref(context: Context, label: String, packageNameSet: Set<String>) =
-            getLabelPref(context).edit().putStringSet(label, packageNameSet).commit()
-
-    fun getLabelContent(context: Context, label: String) =
-            getLabelPref(context).getStringSet(label, Collections.emptySet()) as MutableSet<String>
-
-    fun getLabelSet(context: Context) =
-            getLabelPref(context).getStringSet(PREF_PREFIX_KEY_LABLES, HashSet<String>()) as MutableSet<String>
-
-    fun saveLabelSet(context: Context, labels: Set<String>) =
-            getLabelPref(context).edit().putStringSet(PREF_PREFIX_KEY_LABLES, labels).commit()
-    /*-----------   标签相关  end -------------*/
 
 }

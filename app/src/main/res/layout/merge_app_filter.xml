@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.RelativeLayout">
+
+    <CheckBox
+        android:id="@+id/cb_system"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:text="system " />
+
+    <CheckBox
+        android:id="@+id/cb_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/cb_system"
+        android:text="user" />
+
+    <CheckBox
+        android:id="@+id/cb_grid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/cb_user"
+        android:text="showInGrid" />
+
+    <CheckBox
+        android:id="@+id/cb_enabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cb_system"
+        android:layout_alignParentStart="true"
+        android:text="enabled" />
+
+    <CheckBox
+        android:id="@+id/cb_disabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cb_system"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/cb_enabled"
+        android:text="disabled" />
+
+    <CheckBox
+        android:id="@+id/cb_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cb_system"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/cb_disabled"
+        android:text="labels" />
+</merge>

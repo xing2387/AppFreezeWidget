@@ -12,7 +12,7 @@ import android.util.Log
 import android.widget.RemoteViews
 import xing.appwidget.service.StackWidgetService
 import xing.appwidget.activity.WidgetConfigureActivity
-import xing.appwidget.utils.SharedPreferenceHelper
+import xing.appwidget.storage.SharedPreferenceHelper
 import java.io.DataOutputStream
 
 /**

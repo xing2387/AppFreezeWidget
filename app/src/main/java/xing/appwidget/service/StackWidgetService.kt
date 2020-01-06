@@ -17,7 +17,7 @@ import android.widget.RemoteViewsService.RemoteViewsFactory
 import xing.appwidget.MyAppWidget
 import xing.appwidget.R
 import xing.appwidget.bean.AppInfo
-import xing.appwidget.utils.SharedPreferenceHelper
+import xing.appwidget.storage.SharedPreferenceHelper
 import java.util.*
 
 class StackWidgetService : RemoteViewsService() {
