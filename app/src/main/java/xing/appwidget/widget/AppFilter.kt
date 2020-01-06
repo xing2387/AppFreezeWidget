@@ -32,7 +32,7 @@ class AppFilter : RelativeLayout {
         val filterParam = filterParam
         val appListView = appListView
         if (appListView != null && filterParam != null) {
-            appListView.setEdieMode(filterParam.initWithGrid)
+            if (filterParam.initWithGrid) appListView.showInGrids() else appListView.showInRows()
         }
     }
 

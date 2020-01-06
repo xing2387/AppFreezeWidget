@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.layout_create_label.*
 import xing.appwidget.R
 import xing.appwidget.bean.AppInfo
@@ -14,14 +16,16 @@ import xing.appwidget.storage.AddPackageListTask
 import xing.appwidget.storage.LabelStorageHelper
 import xing.appwidget.widget.AppFilter
 
-class LabelDetailFragment(private val labelName: String, private val editMode: Boolean) : DialogFragment(), AddPackageListTask.OnDataRequestedCallback {
+class LabelDetailFragment(private val labelName: String?, private val editMode: Boolean) : DialogFragment(), AddPackageListTask.OnDataRequestedCallback {
 
     companion object {
-        fun start(activity: AppCompatActivity, labelName: String, isEditMode: Boolean) {
+        fun start(activity: AppCompatActivity, labelName: String?, isEditMode: Boolean) {
             LabelDetailFragment(labelName, isEditMode)
                     .show(activity.supportFragmentManager, LabelDetailFragment::class.java.simpleName)
         }
     }
+
+    val disposeList = ArrayList<Disposable>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,8 +60,33 @@ class LabelDetailFragment(private val labelName: String, private val editMode: B
             app_filter.setParam(PackageFilterParam(user = true, initWithGrid = false))
         } else {
             app_filter.visibility = View.GONE
-            app_list.setData(LabelStorageHelper.getPackageNameListByLabel(labelName))
+            val pm = context?.packageManager
+            if (pm != null && labelName != null) {
+                val packageNames = LabelStorageHelper.getPackageNameListByLabel(labelName)
+                val dispose = LabelStorageHelper.packageNames2AppInfos(pm, packageNames)
+                        .subscribeBy { app_list.setData(it) }
+                disposeList.add(dispose)
+            }
         }
+    }
+
+    override fun onDestroy() {
+        doDispose()
+        super.onDestroy()
+    }
+
+    override fun dismiss() {
+        doDispose()
+        super.dismissAllowingStateLoss()
+    }
+
+    private fun doDispose() {
+        for (disposable in disposeList) {
+            if (!disposable.isDisposed) {
+                disposable.dispose()
+            }
+        }
+        disposeList.clear()
     }
 
     override fun onAppListGet(result: List<AppInfo>) {

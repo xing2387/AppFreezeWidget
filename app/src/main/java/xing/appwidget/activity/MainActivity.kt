@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         tv_apps.setOnClickListener { WidgetConfigureActivity.startTest(this) }
         tv_labels.setOnClickListener { LabelManagerFragment.start(this) }
-        tv_create_label.setOnClickListener { LabelDetailFragment.start(this, true) }
+        tv_create_label.setOnClickListener { LabelDetailFragment.start(this, null, true) }
 
     }
 }

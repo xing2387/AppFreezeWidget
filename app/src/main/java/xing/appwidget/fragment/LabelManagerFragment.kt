@@ -43,16 +43,16 @@ class LabelManagerFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter = Adapter(context!!)
+        adapter = Adapter(activity!!)
         rv_labels.layoutManager = LinearLayoutManager(context)
         rv_labels.adapter = adapter
 
-        iv_add.setOnClickListener { LabelDetailFragment.start(activity as AppCompatActivity, false) }
+        iv_add.setOnClickListener { LabelDetailFragment.start(activity as AppCompatActivity, null, true) }
     }
 
     private fun initObserver() {
         LabelStorageHelper.labelSetLd.observe(this, Observer {
-            adapter.setData(it)
+            if (it != null) adapter.setData(it)
         })
     }
 
@@ -71,7 +71,6 @@ class LabelManagerFragment : DialogFragment() {
         companion object {
             fun createItemView(context: Context, parent: ViewGroup): View {
                 val v = LayoutInflater.from(context).inflate(R.layout.item_label_manager, parent, false)
-                v.setOnClickListener { LabelDetailFragment.start(activity, true) }
                 return v
             }
         }
@@ -82,6 +81,10 @@ class LabelManagerFragment : DialogFragment() {
             itemView.cb_select.visibility = if (editMode) View.VISIBLE else View.GONE
             itemView.cb_select.setOnCheckedChangeListener { buttonView, isChecked ->
                 itemActionListener?.onCheckedChanged(isChecked, itemView.tv_label_name.text.toString())
+            }
+            itemView.setOnClickListener {
+                if (editMode) itemActionListener?.onCheckedChanged(isSelected, itemView.tv_label_name.text.toString())
+                else itemActionListener?.onClickListener(itemView.tv_label_name.text.toString())
             }
         }
 
@@ -118,7 +121,8 @@ class LabelManagerFragment : DialogFragment() {
                 }
 
                 override fun onClickListener(label: String) {
-                    LabelDetailFragment.start()
+                    //Fixme context cast
+                    LabelDetailFragment.start(context as AppCompatActivity, null, true)
                 }
             }
             return viewHolder

@@ -1,11 +1,15 @@
 package xing.appwidget.storage
 
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.lifecycle.MutableLiveData
+import io.reactivex.Flowable
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import xing.appwidget.App
 import xing.appwidget.bean.AppInfo
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
@@ -16,7 +20,7 @@ class LabelStorageHelper {
         private val labelMap = HashMap<String, MutableSet<String>>()
         private val labelColorMap = HashMap<String, Int>()
 
-        val labelSetLd = MutableLiveData<Set<String>>()
+        val labelSetLd = MutableLiveData<Set<String>?>()
         val labelMapLd = MutableLiveData<Map<String, Set<String>>>()
         val labelColorMapLd = MutableLiveData<Map<String, Int>>()
 
@@ -48,16 +52,16 @@ class LabelStorageHelper {
             return labelMap[labelName]
         }
 
-        fun packageName2AppInfo(packageNameList: Set<String>?) {
+        fun packageNames2AppInfos(pm: PackageManager, packageNameList: Set<String>?): Single<List<AppInfo>> {
             val packageNameList = packageNameList
-            if (packageNameList == null) {
-                return
-            }
-            val appInfoList = ArrayList<AppInfo>(packageNameList.size)
+                    ?: return Single.error(RuntimeException("package name list is null !!"))
             val packageInfoList = AddPackageListTask.getCachePackageInfoList()
-            for (packageInfo in packageInfoList) {
-                if (packageNameList.contains(packageInfo.packageName))
-            }
+            return Flowable.fromIterable(packageInfoList)
+                    .filter { packageInfo -> packageNameList.contains(packageInfo.packageName) }
+                    .map { packageInfo -> AddPackageListTask.packageInfo2AppInfo(pm, packageInfo) }
+                    .toList()
+                    .observeOn(Schedulers.computation())
+                    .subscribeOn(AndroidSchedulers.mainThread())
         }
 
         /*-----------   标签相关  start -------------*/
