@@ -15,16 +15,23 @@ import kotlinx.android.synthetic.main.layout_label_manager.*
 import xing.appwidget.R
 import xing.appwidget.storage.LabelStorageHelper
 
-class LabelManagerFragment : DialogFragment() {
+class LabelManagerFragment(private val editMode: Boolean) : DialogFragment() {
 
     companion object {
-        fun start(activity: AppCompatActivity) {
+        fun start(activity: AppCompatActivity, editMode: Boolean,
+                  onLabelSelectedListener: OnLabelSelectedListener? = null,
+                  selectedLabels: Collection<String>? = null) {
             val fm = activity.supportFragmentManager
-            LabelManagerFragment().show(fm, LabelManagerFragment::class.java.simpleName)
+            val fragment = LabelManagerFragment(editMode)
+            fragment.onSelectDoneListener = onLabelSelectedListener
+            fragment.selectedLabels = selectedLabels
+            fragment.show(fm, LabelManagerFragment::class.java.simpleName)
         }
     }
 
     private lateinit var adapter: Adapter
+    private var onSelectDoneListener: OnLabelSelectedListener? = null
+    private var selectedLabels: Collection<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +51,31 @@ class LabelManagerFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter = Adapter(activity!!)
+        adapter.setEditMode(editMode)
+        val selectedLabels = selectedLabels
+        if (selectedLabels != null) {
+            adapter.setSelected(selectedLabels)
+        }
+        group_edit_btns.visibility = if (editMode) View.VISIBLE else View.GONE
+        iv_done.visibility = if (!editMode) View.VISIBLE else View.GONE
         rv_labels.layoutManager = LinearLayoutManager(context)
         rv_labels.adapter = adapter
 
-        iv_add.setOnClickListener { LabelDetailFragment.start(activity as AppCompatActivity, null, true) }
+        iv_delete.setOnClickListener {
+            if (iv_delete.isSelected) {
+                for (label in adapter.getSelectedLabels()) {
+                    LabelStorageHelper.delLabel(label)
+                }
+            }
+            iv_delete.isSelected = !iv_delete.isSelected
+        }
+        iv_done.setOnClickListener {
+            onSelectDoneListener?.onSelected(adapter.getSelectedLabels())
+            dismiss()
+        }
+        iv_add.setOnClickListener {
+            LabelDetailFragment.start(activity as AppCompatActivity, null, true)
+        }
     }
 
     private fun initObserver() {
@@ -78,13 +106,11 @@ class LabelManagerFragment : DialogFragment() {
         fun bindView(label: String, isSelected: Boolean, editMode: Boolean) {
             itemView.tv_label_name.text = label
             itemView.cb_select.isChecked = isSelected
-            itemView.cb_select.visibility = if (editMode) View.VISIBLE else View.GONE
             itemView.cb_select.setOnCheckedChangeListener { buttonView, isChecked ->
                 itemActionListener?.onCheckedChanged(isChecked, itemView.tv_label_name.text.toString())
             }
             itemView.setOnClickListener {
-                if (editMode) itemActionListener?.onCheckedChanged(isSelected, itemView.tv_label_name.text.toString())
-                else itemActionListener?.onClickListener(itemView.tv_label_name.text.toString())
+                itemActionListener?.onClickListener(itemView.tv_label_name.text.toString())
             }
         }
 
@@ -111,6 +137,12 @@ class LabelManagerFragment : DialogFragment() {
             this.editMode = editMode
         }
 
+        fun setSelected(selectedLabels: Collection<String>) {
+            selected.clear()
+            selected.addAll(selectedLabels)
+            notifyDataSetChanged()
+        }
+
         fun getSelectedLabels() = selected
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -122,7 +154,7 @@ class LabelManagerFragment : DialogFragment() {
 
                 override fun onClickListener(label: String) {
                     //Fixme context cast
-                    LabelDetailFragment.start(context as AppCompatActivity, null, true)
+                    LabelDetailFragment.start(context as AppCompatActivity, label, editMode)
                 }
             }
             return viewHolder
@@ -133,5 +165,9 @@ class LabelManagerFragment : DialogFragment() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.bindView(data[position], selected.contains(data[position]), editMode)
         }
+    }
+
+    interface OnLabelSelectedListener {
+        fun onSelected(labels: Collection<String>)
     }
 }

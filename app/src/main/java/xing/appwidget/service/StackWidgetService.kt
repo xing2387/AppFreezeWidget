@@ -57,8 +57,8 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
                 val appName = pm.getApplicationLabel(info).toString()
                 val packageName = info.packageName
                 val appIcon = pm.getApplicationIcon(info)
-                val appInfo = AppInfo(appName, packageName, appIcon)
-                appInfo.enabled = info.enabled
+                val appInfo = AppInfo(appName, packageName, appIcon, info.enabled)
+
                 Log.d(TAG, "onCreate: " + appName + " --> " + appInfo.enabled)
                 mAppInfoList.add(appInfo)
             }

@@ -5,4 +5,7 @@
     <color name="colorAccent">#D81B60</color>
 
     <color name="textColorPrimary">#333333</color>
+
+    <color name="bg_enabled">#FFFFFF</color>
+    <color name="bg_disabled">#33000000</color>
 </resources>

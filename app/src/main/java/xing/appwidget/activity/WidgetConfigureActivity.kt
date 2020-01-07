@@ -1,23 +1,31 @@
 package xing.appwidget.activity
 
-import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.functions.BiFunction
+import io.reactivex.rxkotlin.toFlowable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_widget_configure.*
 import kotlinx.android.synthetic.main.activity_widget_configure.app_filter
 import kotlinx.android.synthetic.main.layout_create_label.*
-import xing.appwidget.R
-import xing.appwidget.storage.SharedPreferenceHelper
-import xing.appwidget.bean.AppInfo
 import xing.appwidget.MyAppWidget
+import xing.appwidget.R
+import xing.appwidget.bean.AppInfo
 import xing.appwidget.bean.PackageFilterParam
+import xing.appwidget.fragment.LabelManagerFragment
 import xing.appwidget.storage.AddPackageListTask
+import xing.appwidget.storage.AppInfoStorageHelper
+import xing.appwidget.storage.LabelStorageHelper
+import xing.appwidget.storage.SharedPreferenceHelper
 import xing.appwidget.widget.AppFilter
 
-class WidgetConfigureActivity : Activity(), AddPackageListTask.OnDataRequestedCallback {
+class WidgetConfigureActivity : AppCompatActivity(), AddPackageListTask.OnDataRequestedCallback, LabelManagerFragment.OnLabelSelectedListener {
 
     companion object {
         private const val TAG = "MyAppWidgetConfigureAct"
@@ -28,6 +36,8 @@ class WidgetConfigureActivity : Activity(), AddPackageListTask.OnDataRequestedCa
             context.startActivity(intent)
         }
     }
+
+    private val disposeList = ArrayList<Disposable>()
 
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
 
@@ -53,14 +63,57 @@ class WidgetConfigureActivity : Activity(), AddPackageListTask.OnDataRequestedCa
         initData()
     }
 
+    override fun onDestroy() {
+        doDispose()
+        super.onDestroy()
+    }
+
+    private fun getData(isInit: Boolean, param: PackageFilterParam?) {
+        if (param == null) {
+            return
+        }
+
+        val context = this@WidgetConfigureActivity
+        val single1: Single<List<AppInfo>> = AppInfoStorageHelper
+                .getAppInfoWithFilter(context.packageManager, param)
+        val tempLabelList = HashSet<String>()
+        var single2: Single<List<Set<String>>> =
+                if (!isInit) Single.just(ArrayList(0))
+                else tempLabelList.toFlowable()
+                        .map { label -> LabelStorageHelper.getPackageNameListByLabel(label) }
+                        .toList()
+        val biFunction = BiFunction<List<AppInfo>, List<Set<String>>, Unit> { t1, t2 ->
+            if (t2.isNotEmpty()) {
+                val set = HashSet<String>()
+                t2.forEach { set.addAll(it) }
+                rv_app_list.setSelectedPacakgeByName(set)
+            }
+            rv_app_list.setData(t1)
+        }
+        val disposable = Single.zip(single1, single2, biFunction)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
+        disposeList.add(disposable)
+
+    }
+
     private fun initData() {
         app_filter.setAppListView(rv_app_list)
         app_filter.setDataProvider(object : AppFilter.DataProvider {
             override fun request(param: PackageFilterParam?) {
-                AddPackageListTask(this@WidgetConfigureActivity).execute(param)
+                getData(false, param)
+            }
+
+            override fun openLabelList(param: PackageFilterParam?) {
+                LabelManagerFragment.start(this@WidgetConfigureActivity, false,
+                        onLabelSelectedListener = this@WidgetConfigureActivity,
+                        selectedLabels = app_filter.getLabels())
             }
         })
-        app_filter.setParam(PackageFilterParam(user = true, initWithGrid = true))
+        val param = PackageFilterParam(user = true, initWithGrid = true)
+        getData(true, param)
+        app_filter.setParam(param)
     }
 
     private fun initView() {
@@ -85,4 +138,17 @@ class WidgetConfigureActivity : Activity(), AddPackageListTask.OnDataRequestedCa
         rv_app_list.setData(result)
     }
 
+    override fun onSelected(labels: Collection<String>) {
+        app_filter.setLabels(labels)
+    }
+
+
+    private fun doDispose() {
+        for (disposable in disposeList) {
+            if (!disposable.isDisposed) {
+                disposable.dispose()
+            }
+        }
+        disposeList.clear()
+    }
 }

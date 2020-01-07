@@ -26,8 +26,7 @@ class AddPackageListTask : AsyncTask<PackageFilterParam, Int, List<AppInfo>> {
             val appName = pm.getApplicationLabel(applicationInfo).toString()
             val packageName = packageInfo.packageName
             val appIcon = pm.getApplicationIcon(applicationInfo)
-            val appInfo = AppInfo(appName, packageName, appIcon)
-            appInfo.enabled = applicationInfo.enabled
+            val appInfo = AppInfo(appName, packageName, appIcon, applicationInfo.enabled)
             return appInfo
         }
     }

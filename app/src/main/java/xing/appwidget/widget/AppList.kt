@@ -12,6 +12,9 @@ import kotlinx.android.synthetic.main.item_configure_app_linear.view.*
 import xing.appwidget.R
 import xing.appwidget.bean.PackageFilterParam
 import xing.appwidget.bean.AppInfo
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 
 class AppList : RecyclerView {
 
@@ -44,6 +47,12 @@ class AppList : RecyclerView {
 
     fun getSelectedPackageName(): Set<String> {
         return adapter.selectedPackageName
+    }
+
+    fun setSelectedPacakgeByName(packageNameList: Collection<String>) {
+        adapter.selectedPackageName.clear()
+        adapter.selectedPackageName.addAll(packageNameList)
+        adapter.notifyDataSetChanged()
     }
 
     fun selectAll() {
@@ -85,9 +94,6 @@ internal class AppListAdapter(private val context: Context, private var isGrid: 
             return
         }
         this.editMode = editMode
-        if (!editMode) {
-            selectedPackageName.clear()
-        }
         notifyDataSetChanged()
     }
 
@@ -188,6 +194,8 @@ internal class AppInfoHolder(context: Context, parent: ViewGroup?, isGrid: Boole
         itemView.cb_check.isChecked = isChecked
         itemView.tv_package_name?.text = appInfo.packageName
         itemView.setOnClickListener(this)
+        val colorResId = if (appInfo.enabled) R.color.bg_enabled else R.color.bg_disabled
+        itemView.setBackgroundColor(itemView.context.resources.getColor(colorResId))
     }
 
     override fun onClick(v: View?) {
