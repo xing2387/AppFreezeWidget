@@ -13,8 +13,7 @@ import io.reactivex.rxkotlin.toFlowable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_widget_configure.*
 import kotlinx.android.synthetic.main.activity_widget_configure.app_filter
-import kotlinx.android.synthetic.main.layout_create_label.*
-import xing.appwidget.MyAppWidget
+import xing.appwidget.WidgetAppList
 import xing.appwidget.R
 import xing.appwidget.bean.AppInfo
 import xing.appwidget.bean.PackageFilterParam
@@ -25,13 +24,13 @@ import xing.appwidget.storage.LabelStorageHelper
 import xing.appwidget.storage.SharedPreferenceHelper
 import xing.appwidget.widget.AppFilter
 
-class WidgetConfigureActivity : AppCompatActivity(), AddPackageListTask.OnDataRequestedCallback, LabelManagerFragment.OnLabelSelectedListener {
+class AppListWidgetConfigureActivity : AppCompatActivity(), AddPackageListTask.OnDataRequestedCallback, LabelManagerFragment.OnLabelSelectedListener {
 
     companion object {
         private const val TAG = "MyAppWidgetConfigureAct"
         private const val EXTRA_TEST_APPWIDGET_ID = 10086
         fun startTest(context: Context) {
-            val intent = Intent(context, WidgetConfigureActivity::class.java)
+            val intent = Intent(context, AppListWidgetConfigureActivity::class.java)
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, EXTRA_TEST_APPWIDGET_ID)
             context.startActivity(intent)
         }
@@ -73,7 +72,7 @@ class WidgetConfigureActivity : AppCompatActivity(), AddPackageListTask.OnDataRe
             return
         }
 
-        val context = this@WidgetConfigureActivity
+        val context = this@AppListWidgetConfigureActivity
         val single1: Single<List<AppInfo>> = AppInfoStorageHelper
                 .getAppInfoWithFilter(context.packageManager, param)
         val tempLabelList = HashSet<String>()
@@ -106,8 +105,8 @@ class WidgetConfigureActivity : AppCompatActivity(), AddPackageListTask.OnDataRe
             }
 
             override fun openLabelList(param: PackageFilterParam?) {
-                LabelManagerFragment.start(this@WidgetConfigureActivity, false,
-                        onLabelSelectedListener = this@WidgetConfigureActivity,
+                LabelManagerFragment.start(this@AppListWidgetConfigureActivity, false,
+                        onLabelSelectedListener = this@AppListWidgetConfigureActivity,
                         selectedLabels = app_filter.getLabels())
             }
         })
@@ -120,12 +119,12 @@ class WidgetConfigureActivity : AppCompatActivity(), AddPackageListTask.OnDataRe
         btn_select_all.setOnClickListener { v -> rv_app_list.selectAll() }
         btn_un_select_all.setOnClickListener { rv_app_list.unSelectAll() }
         tv_btn_done.setOnClickListener {
-            val context: Context = this@WidgetConfigureActivity
+            val context: Context = this@AppListWidgetConfigureActivity
             // When the button is clicked, store the string locally
             SharedPreferenceHelper.savePackageNameListPref(context, appWidgetId, rv_app_list.getSelectedPackageName())
             // It is the responsibility of the configuration activity to update the app widget
             val appWidgetManager = AppWidgetManager.getInstance(context)
-            MyAppWidget.Companion.updateAppWidget(context, appWidgetManager, appWidgetId)
+            WidgetAppList.updateAppWidget(context, appWidgetManager, appWidgetId)
             // Make sure we pass back the original appWidgetId
             val resultValue = Intent()
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)

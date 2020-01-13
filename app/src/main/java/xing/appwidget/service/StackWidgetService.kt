@@ -14,11 +14,13 @@ import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import android.widget.RemoteViewsService.RemoteViewsFactory
-import xing.appwidget.MyAppWidget
+import xing.appwidget.WidgetAppList
 import xing.appwidget.R
+import xing.appwidget.WidgetBase
 import xing.appwidget.bean.AppInfo
 import xing.appwidget.storage.SharedPreferenceHelper
 import java.util.*
+import kotlin.collections.ArrayList
 
 class StackWidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
@@ -35,7 +37,7 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
     private val mIconSize: Int
     private var mIsEditMode = false
     private val mPackageNameList = HashSet<String>()
-    private val mAppInfoList = ArrayList<AppInfo>()
+    private var mAppInfoList: ArrayList<AppInfo>? = null
 
     init {
         mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -47,50 +49,57 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         // In onCreate() you setup any connections / cursors to your data source. Heavy lifting,
         // for example downloading or creating content etc, should be deferred to onDataSetChanged()
         // or getViewAt(). Taking more than 20 seconds in this call will result in an ANR.
-        mAppInfoList.clear()
+        mAppInfoList?.clear()
         val packages = SharedPreferenceHelper.loadPackageNameListPref(mContext, mAppWidgetId)
-        Log.d(TAG, "onCreate: $mAppWidgetId,$packages")
-        val pm = mContext.packageManager
-        val applicationInfoList = pm.getInstalledApplications(0)
-        for (info in applicationInfoList) {
-            if (packages!!.contains(info.packageName)) {
-                val appName = pm.getApplicationLabel(info).toString()
-                val packageName = info.packageName
-                val appIcon = pm.getApplicationIcon(info)
-                val appInfo = AppInfo(appName, packageName, appIcon, info.enabled)
-
-                Log.d(TAG, "onCreate: " + appName + " --> " + appInfo.enabled)
-                mAppInfoList.add(appInfo)
-            }
+        if (!packages.isNullOrEmpty()) {
+            mPackageNameList.addAll(packages)
         }
         Log.d(TAG, "onCreate: $mAppInfoList")
-        // We sleep for 3 seconds here to show how the empty view appears in the interim.
-        // The empty view is set in the StackWidgetProvider and should be a sibling of the
-        // collection view.
-        try {
-            Thread.sleep(3000)
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
     }
 
     override fun onDestroy() {
-        // In onDestroy() you should tear down anything that was setup for your data source,
-        // eg. cursors, connections, etc.
-        //        mWidgetItems.clear();
+        mPackageNameList.clear()
+        mAppInfoList?.clear()
+        mAppInfoList = null
     }
 
     override fun getCount(): Int {
-        Log.d(TAG, "getCount: " + mAppInfoList.size)
-        return mAppInfoList.size
+        Log.d(TAG, "getCount: " + mPackageNameList.size)
+        return mPackageNameList.size
     }
 
     override fun getViewAt(position: Int): RemoteViews {
+
+        if (mAppInfoList == null) {
+            synchronized(this) {
+                if (mAppInfoList == null) {
+                    mAppInfoList = ArrayList(mPackageNameList.size)
+                    val pm = mContext.packageManager
+                    val applicationInfoList = pm.getInstalledApplications(0)
+                    for (info in applicationInfoList) {
+                        if (mPackageNameList.contains(info.packageName)) {
+                            val appName = pm.getApplicationLabel(info).toString()
+                            val packageName = info.packageName
+                            val appIcon = pm.getApplicationIcon(info)
+                            val appInfo = AppInfo(appName, packageName, appIcon, info.enabled)
+                            SharedPreferenceHelper.saveEnableState(mContext, appName, appInfo.enabled)
+
+                            Log.d(TAG, "onCreate: " + appName + " --> " + appInfo.enabled)
+                            mAppInfoList?.add(appInfo)
+                        }
+                    }
+                }
+            }
+        }
+
         // position will always range from 0 to getCount() - 1.
         // We construct a remote views item based on our widget item xml file, and set the
         // text based on the position.
-        val appInfo = mAppInfoList[position]
+        val appInfo = mAppInfoList?.get(position)
         val rv = RemoteViews(mContext.packageName, R.layout.item_widget_app)
+        if (appInfo == null) {
+            return rv
+        }
         rv.setTextViewText(R.id.tv_name, appInfo.appName)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                 appInfo.appIcon is AdaptiveIconDrawable) {
@@ -111,7 +120,7 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         // Next, we set a fill-intent which will be used to fill-in the pending intent template
         // which is set on the collection view in StackWidgetProvider.
         val extras = Bundle()
-        extras.putString(MyAppWidget.APP_LIST, appInfo.packageName)
+        extras.putString(WidgetBase.APP_LIST, appInfo.packageName)
         val fillInIntent = Intent()
         fillInIntent.putExtras(extras)
         rv.setOnClickFillInIntent(R.id.layout_item, fillInIntent)
@@ -150,8 +159,11 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         // in its current state while work is being done here, so you don't need to worry about
         // locking up the widget.
         mIsEditMode = SharedPreferenceHelper.loadEditModePref(mContext, mAppWidgetId)
-        for (info in mAppInfoList) {
-            info.enabled = SharedPreferenceHelper.getEnableState(mContext, info.packageName)
+        val appInfoList = mAppInfoList
+        if (appInfoList != null) {
+            for (info in appInfoList) {
+                info.enabled = SharedPreferenceHelper.getEnableState(mContext, info.packageName)
+            }
         }
     }
 

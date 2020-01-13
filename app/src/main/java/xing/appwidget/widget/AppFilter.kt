@@ -2,7 +2,6 @@ package xing.appwidget.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.RelativeLayout
 import kotlinx.android.synthetic.main.merge_app_filter.view.*

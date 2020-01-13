@@ -4,10 +4,8 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.AsyncTask
-import android.util.Log
 import xing.appwidget.App
 import xing.appwidget.BuildConfig
-import xing.appwidget.activity.WidgetConfigureActivity
 import xing.appwidget.bean.AppInfo
 import xing.appwidget.bean.PackageFilterParam
 import xing.appwidget.utils.Utils
