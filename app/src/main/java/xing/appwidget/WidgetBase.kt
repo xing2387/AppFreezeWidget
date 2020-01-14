@@ -60,7 +60,7 @@ abstract class WidgetBase : AppWidgetProvider() {
                         isFreeze = applicationInfo.enabled
                     }
                     sbCmd.append("pm " + (if (!isFreeze) "enable " else "disable ") + packageName + "; ")
-                    SharedPreferenceHelper.saveEnableState(context, packageName, !applicationInfo.enabled)
+                    SharedPreferenceHelper.saveEnableState(context, packageName, !isFreeze)
                 }
             }
             Log.d("liujiaxing", "switchAppFreezeStatus $sbCmd")
