@@ -5,22 +5,13 @@
     android:padding="@dimen/widget_margin">
 
     <TextView
-        android:id="@+id/btn_edit_mode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="20dp"
-        android:gravity="center"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:text="edit off"
-        android:textSize="12sp"
-        android:visibility="gone" />
-
-    <GridView
-        android:id="@+id/grid_view"
+        android:id="@+id/tv_label_name"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/btn_edit_mode"
-        android:numColumns="4" />
+        android:background="#55000000"
+        android:gravity="center"
+        android:text="标签"
+        android:textColor="#AAFFFFFF"
+        android:textSize="14sp" />
+
 </RelativeLayout>

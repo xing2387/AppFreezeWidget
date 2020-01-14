@@ -12,9 +12,8 @@ import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.toFlowable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_widget_configure.*
-import kotlinx.android.synthetic.main.activity_widget_configure.app_filter
-import xing.appwidget.WidgetAppList
 import xing.appwidget.R
+import xing.appwidget.WidgetAppList
 import xing.appwidget.bean.AppInfo
 import xing.appwidget.bean.PackageFilterParam
 import xing.appwidget.fragment.LabelManagerFragment
@@ -116,7 +115,7 @@ class AppListWidgetConfigureActivity : AppCompatActivity(), AddPackageListTask.O
     }
 
     private fun initView() {
-        btn_select_all.setOnClickListener { v -> rv_app_list.selectAll() }
+        btn_select_all.setOnClickListener { rv_app_list.selectAll() }
         btn_un_select_all.setOnClickListener { rv_app_list.unSelectAll() }
         tv_btn_done.setOnClickListener {
             val context: Context = this@AppListWidgetConfigureActivity

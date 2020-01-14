@@ -14,7 +14,6 @@ import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import android.widget.RemoteViewsService.RemoteViewsFactory
-import xing.appwidget.WidgetAppList
 import xing.appwidget.R
 import xing.appwidget.WidgetBase
 import xing.appwidget.bean.AppInfo
@@ -82,7 +81,7 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
                             val packageName = info.packageName
                             val appIcon = pm.getApplicationIcon(info)
                             val appInfo = AppInfo(appName, packageName, appIcon, info.enabled)
-                            SharedPreferenceHelper.saveEnableState(mContext, appName, appInfo.enabled)
+                            SharedPreferenceHelper.saveEnableState(mContext, packageName, appInfo.enabled)
 
                             Log.d(TAG, "onCreate: " + appName + " --> " + appInfo.enabled)
                             mAppInfoList?.add(appInfo)
@@ -96,41 +95,39 @@ internal class StackRemoteViewsFactory(private val mContext: Context, intent: In
         // We construct a remote views item based on our widget item xml file, and set the
         // text based on the position.
         val appInfo = mAppInfoList?.get(position)
-        val rv = RemoteViews(mContext.packageName, R.layout.item_widget_app)
+        val remoteView = RemoteViews(mContext.packageName, R.layout.item_widget_app)
         if (appInfo == null) {
-            return rv
+            return remoteView
         }
-        rv.setTextViewText(R.id.tv_name, appInfo.appName)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                appInfo.appIcon is AdaptiveIconDrawable) {
+        remoteView.setTextViewText(R.id.tv_name, appInfo.appName)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && appInfo.appIcon is AdaptiveIconDrawable) {
             val drawable = appInfo.appIcon as AdaptiveIconDrawable
             val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             drawable.setBounds(0, 0, canvas.width, canvas.height)
             drawable.draw(canvas)
-            //            Bitmap shadow = getShadowBitmap(drawable);
             appInfo.appIcon = BitmapDrawable(mContext.resources, bitmap)
         }
         if (appInfo.appIcon is BitmapDrawable) {
-            rv.setImageViewBitmap(R.id.iv_icon, (appInfo.appIcon as BitmapDrawable).bitmap)
+            remoteView.setImageViewBitmap(R.id.iv_icon, (appInfo.appIcon as BitmapDrawable).bitmap)
         } else {
             Log.w(TAG, "getViewAt: icon drawable is " + appInfo.appIcon.javaClass.simpleName)
         }
-        rv.setViewVisibility(R.id.v_mask, if (appInfo.enabled) View.GONE else View.VISIBLE)
+        remoteView.setViewVisibility(R.id.v_mask, if (appInfo.enabled) View.GONE else View.VISIBLE)
         // Next, we set a fill-intent which will be used to fill-in the pending intent template
         // which is set on the collection view in StackWidgetProvider.
         val extras = Bundle()
         extras.putString(WidgetBase.APP_LIST, appInfo.packageName)
         val fillInIntent = Intent()
         fillInIntent.putExtras(extras)
-        rv.setOnClickFillInIntent(R.id.layout_item, fillInIntent)
+        remoteView.setOnClickFillInIntent(R.id.layout_item, fillInIntent)
         // You can do heaving lifting in here, synchronously. For example, if you need to
         // process an image, fetch something from the network, etc., it is ok to do it here,
         // synchronously. A loading view will show up in lieu of the actual contents in the
         // interim.
         Log.d(TAG, "getViewAt: " + appInfo.appName + " --> " + appInfo.enabled)
         // Return the remote views object.
-        return rv
+        return remoteView
     }
 
     override fun getLoadingView(): RemoteViews? {

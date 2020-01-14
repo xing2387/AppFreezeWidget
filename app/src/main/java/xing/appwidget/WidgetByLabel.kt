@@ -1,12 +1,18 @@
 package xing.appwidget
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
+import android.widget.RemoteViews
+import xing.appwidget.service.StackWidgetService
+import xing.appwidget.storage.LabelStorageHelper
 import xing.appwidget.storage.SharedPreferenceHelper
+import xing.appwidget.utils.Utils
 
 class WidgetByLabel : WidgetBase() {
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
@@ -17,9 +23,6 @@ class WidgetByLabel : WidgetBase() {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
     }
 
-    private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
-    }
-
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         // When the user deletes the widget, delete the preference associated with it.
         for (appWidgetId in appWidgetIds) {
@@ -27,37 +30,45 @@ class WidgetByLabel : WidgetBase() {
         }
     }
 
-    override fun onReceive(context: Context, intent: Intent, appWidgetId: Int) {
-        if (SWITCH_ACTION == intent.action) {
-            val content = intent.getStringExtra(APP_LIST)
-            Log.d("liujiaxing", "onReceive  $content")
-            val packageNames = content.split(",").toTypedArray()
-            val sbCmd = StringBuilder()
-            val pm = context.packageManager
-            for (name in packageNames) { //                boolean isEnable = Utils.getEnableState(context, name);
-                var applicationInfo: ApplicationInfo? = null
-                try {
-                    applicationInfo = pm.getApplicationInfo(name, PackageManager.GET_META_DATA)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    e.printStackTrace()
-                }
-                if (applicationInfo != null) {
-                    sbCmd.append("pm " + (if (!applicationInfo.enabled) "enable " else "disable ") + name + ";")
-                    SharedPreferenceHelper.saveEnableState(context, name, !applicationInfo.enabled)
-                }
-            }
-            rootCommand(sbCmd.toString())
-            //            Toast.makeText(context, "Touched view " + content, Toast.LENGTH_SHORT).show();
-            // It is the responsibility of the configuration activity to update the app widget
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.grid_view)
-        } else if (EDIT_ACTION == intent.action) {
-            val isEditMode = SharedPreferenceHelper.loadEditModePref(context, appWidgetId)
-            SharedPreferenceHelper.setEditModePref(context, appWidgetId, !isEditMode)
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.grid_view)
+    companion object {
+        fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+
+            val labelName = SharedPreferenceHelper.getAppWidgetLabelPref(context, appWidgetId)
+
+            val remoteViewRoot = RemoteViews(context.packageName, R.layout.layout_widget_by_label)
+            val enableStatus = SharedPreferenceHelper.getLabelEnableStatusPref(context, labelName)
+
+            val actionStr = if (enableStatus) "冻结" else "解冻"
+            remoteViewRoot.setTextViewText(R.id.tv_label_name, "$actionStr\n$labelName")
+
+            //设置点击后发送的PendingIntent
+            val switchIntent = Intent(context, WidgetByLabel::class.java)
+            switchIntent.action = SWITCH_ACTION
+            switchIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            switchIntent.putExtra(LABEL, labelName)
+            val switchPendingIntent = PendingIntent.getBroadcast(context, 0, switchIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            remoteViewRoot.setOnClickPendingIntent(R.id.tv_label_name, switchPendingIntent)
+
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViewRoot)
         }
-        super.onReceive(context, intent)
+    }
+
+    override fun onReceive(context: Context, intent: Intent, appWidgetId: Int) {
+        if (intent.action == SWITCH_ACTION) {
+            val labelName = intent.getStringExtra(LABEL)
+            if (labelName.isNullOrEmpty()) {
+                return
+            }
+
+            LabelStorageHelper.init(context)
+            val packageNameList = LabelStorageHelper.getPackageNameListByLabel(labelName)
+            val enableStatus = SharedPreferenceHelper.getLabelEnableStatusPref(context, labelName)
+            switchAppFreezeStatus(context, packageNameList, enableStatus)
+            SharedPreferenceHelper.saveLabelEnableStatusPref(context, labelName, !enableStatus)
+
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            updateAppWidget(context, appWidgetManager, appWidgetId)
+        }
     }
 
 }

@@ -36,4 +36,25 @@
         android:text="添加标签"
         app:layout_constraintTop_toBottomOf="@id/tv_apps" />
 
+    <TextView
+        android:id="@+id/tv_export"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="导出配置"
+        app:layout_constraintTop_toBottomOf="@id/tv_create_label" />
+
+    <TextView
+        android:id="@+id/tv_import"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="导入配置"
+        app:layout_constraintTop_toBottomOf="@id/tv_export" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

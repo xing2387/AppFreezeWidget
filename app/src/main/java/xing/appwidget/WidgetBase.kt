@@ -1,16 +1,12 @@
 package xing.appwidget
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.util.Log
-import android.widget.RemoteViews
-import xing.appwidget.service.StackWidgetService
 import xing.appwidget.storage.SharedPreferenceHelper
 import java.io.DataOutputStream
 
@@ -48,21 +44,26 @@ abstract class WidgetBase : AppWidgetProvider() {
         const val APP_LIST = "xing.appwidget.APP_LIST"
         const val LABEL = "xing.appwidget.LABEL"
 
-        fun switchAppFreezeStatus(context: Context, packageNames: ArrayList<String>) {
+        fun switchAppFreezeStatus(context: Context, packageNames: Iterable<String>, isFreeze: Boolean?) {
             val sbCmd = StringBuilder()
             val pm = context.packageManager
-            for (name in packageNames) {
+            var isFreeze = isFreeze
+            for (packageName in packageNames) {
                 var applicationInfo: ApplicationInfo? = null
                 try {
-                    applicationInfo = pm.getApplicationInfo(name, PackageManager.GET_META_DATA)
+                    applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
                 } catch (e: PackageManager.NameNotFoundException) {
                     e.printStackTrace()
                 }
                 if (applicationInfo != null) {
-                    sbCmd.append("pm " + (if (!applicationInfo.enabled) "enable " else "disable ") + name + "; ")
-                    SharedPreferenceHelper.saveEnableState(context, name, !applicationInfo.enabled)
+                    if (isFreeze == null) {
+                        isFreeze = applicationInfo.enabled
+                    }
+                    sbCmd.append("pm " + (if (!isFreeze) "enable " else "disable ") + packageName + "; ")
+                    SharedPreferenceHelper.saveEnableState(context, packageName, !applicationInfo.enabled)
                 }
             }
+            Log.d("liujiaxing", "switchAppFreezeStatus $sbCmd")
             rootCommand(sbCmd.toString())
         }
 

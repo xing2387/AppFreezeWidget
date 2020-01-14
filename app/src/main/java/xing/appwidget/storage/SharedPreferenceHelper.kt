@@ -10,8 +10,9 @@ object SharedPreferenceHelper {
     const val PREFS_MAIN = "xing.appwidget.MyAppWidget"
     const val PREFS_LABELS = "labels"
     const val PREF_PREFIX_KEY_PACKAGE_NAME = "appwidget_packagenames_"
+    const val PREF_PREFIX_KEY_LABLE = "appwidget_labelnames_"
     const val PREF_PREFIX_KEY_EDIT_MODE = "appwidget_edit_mode_"
-    const val PREF_PREFIX_KEY_LABLES = "appwidget_labels"
+    const val PREF_KEY_LABLES = "appwidget_labels"
 
     fun updateStateListPref(context: Context, enableStateMap: HashMap<String?, Boolean?>) {
         val prefs = context.getSharedPreferences(PREFS_MAIN, 0).edit()
@@ -46,6 +47,18 @@ object SharedPreferenceHelper {
 
     fun loadEditModePref(context: Context, appWidgetId: Int) =
             getMainPref(context).getBoolean(PREF_PREFIX_KEY_EDIT_MODE + appWidgetId, true)
+
+    fun saveAppWidgetLabelPref(context: Context, appWidgetId: Int, labelName: String) =
+            getMainPref(context).edit().putString(PREF_PREFIX_KEY_LABLE + appWidgetId, labelName).commit()
+
+    fun getAppWidgetLabelPref(context: Context, appWidgetId: Int) =
+            getMainPref(context).getString(PREF_PREFIX_KEY_LABLE + appWidgetId, "") ?: ""
+
+    fun saveLabelEnableStatusPref(context: Context, labelName: String, isEnabled: Boolean) =
+            getMainPref(context).edit().putBoolean(labelName, isEnabled).commit()
+
+    fun getLabelEnableStatusPref(context: Context, labelName: String) =
+            getMainPref(context).getBoolean(labelName, true)
 
 
 }

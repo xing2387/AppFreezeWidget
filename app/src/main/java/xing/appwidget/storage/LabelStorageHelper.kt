@@ -4,10 +4,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import xing.appwidget.App
@@ -104,10 +102,10 @@ class LabelStorageHelper {
                 _getLabelPref(context).edit().remove(label).commit()
 
         private fun _getLabelSet(context: Context) =
-                _getLabelPref(context).getStringSet(SharedPreferenceHelper.PREF_PREFIX_KEY_LABLES, HashSet<String>()) as MutableSet<String>
+                _getLabelPref(context).getStringSet(SharedPreferenceHelper.PREF_KEY_LABLES, HashSet<String>()) as MutableSet<String>
 
         private fun _saveLabelSet(context: Context, labels: Set<String>) =
-                _getLabelPref(context).edit().putStringSet(SharedPreferenceHelper.PREF_PREFIX_KEY_LABLES, labels).commit()
+                _getLabelPref(context).edit().putStringSet(SharedPreferenceHelper.PREF_KEY_LABLES, labels).commit()
         /*-----------   标签相关  end -------------*/
 
         private fun logInit(msg: String) {

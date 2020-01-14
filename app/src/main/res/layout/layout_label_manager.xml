@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             app:constraint_referenced_ids="iv_add,iv_delete" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <xing.appwidget.widget.LabelList
             android:id="@+id/rv_labels"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
