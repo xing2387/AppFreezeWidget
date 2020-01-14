@@ -3,7 +3,6 @@ package xing.appwidget.storage
 import android.annotation.SuppressLint
 import android.content.Context
 import java.util.*
-import kotlin.collections.HashSet
 
 @SuppressLint("ApplySharedPref")
 object SharedPreferenceHelper {
@@ -51,6 +50,9 @@ object SharedPreferenceHelper {
     fun saveAppWidgetLabelPref(context: Context, appWidgetId: Int, labelName: String) =
             getMainPref(context).edit().putString(PREF_PREFIX_KEY_LABLE + appWidgetId, labelName).commit()
 
+    fun deleteAppWidgetLabelPref(context: Context, appWidgetId: Int) =
+            getMainPref(context).edit().remove(PREF_PREFIX_KEY_LABLE + appWidgetId).commit()
+
     fun getAppWidgetLabelPref(context: Context, appWidgetId: Int) =
             getMainPref(context).getString(PREF_PREFIX_KEY_LABLE + appWidgetId, "") ?: ""
 
@@ -59,6 +61,5 @@ object SharedPreferenceHelper {
 
     fun getLabelEnableStatusPref(context: Context, labelName: String) =
             getMainPref(context).getBoolean(labelName, true)
-
 
 }

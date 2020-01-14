@@ -4,12 +4,8 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
 import android.widget.RemoteViews
-import android.widget.Toast
 import xing.appwidget.service.StackWidgetService
 import xing.appwidget.storage.SharedPreferenceHelper
 
@@ -25,6 +21,7 @@ class WidgetAppList : WidgetBase() {
         for (appWidgetId in appWidgetIds) {
             SharedPreferenceHelper.deletePackageNameListPref(context, appWidgetId)
         }
+        super.onDeleted(context, appWidgetIds)
     }
 
     companion object {

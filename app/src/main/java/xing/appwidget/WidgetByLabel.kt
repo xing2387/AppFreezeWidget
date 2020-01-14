@@ -4,15 +4,9 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.util.Log
 import android.widget.RemoteViews
-import xing.appwidget.service.StackWidgetService
 import xing.appwidget.storage.LabelStorageHelper
 import xing.appwidget.storage.SharedPreferenceHelper
-import xing.appwidget.utils.Utils
 
 class WidgetByLabel : WidgetBase() {
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
@@ -26,8 +20,9 @@ class WidgetByLabel : WidgetBase() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         // When the user deletes the widget, delete the preference associated with it.
         for (appWidgetId in appWidgetIds) {
-            SharedPreferenceHelper.deletePackageNameListPref(context, appWidgetId)
+            SharedPreferenceHelper.deleteAppWidgetLabelPref(context, appWidgetId)
         }
+        super.onDeleted(context, appWidgetIds)
     }
 
     companion object {
