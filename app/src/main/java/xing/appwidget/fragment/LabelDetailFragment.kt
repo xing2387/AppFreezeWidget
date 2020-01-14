@@ -66,8 +66,9 @@ class LabelDetailFragment(private val labelName: String?, private val editMode: 
             }
             dismiss()
         }
+        tv_select_all.setOnClickListener { app_list.selectAll() }
+        tv_un_select_all.setOnClickListener { app_list.unSelectAll() }
         if (editMode) {
-
             app_filter.visibility = View.VISIBLE
             app_filter.setAppListView(app_list)
             app_filter.setDataProvider(object : AppFilter.DataProvider {

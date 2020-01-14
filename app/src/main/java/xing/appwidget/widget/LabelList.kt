@@ -96,14 +96,16 @@ class LabelList : RecyclerView {
         }
 
         fun bindView(label: String, isSelected: Boolean, editMode: Boolean) {
-            itemView.tv_label_name.text = label
-            itemView.cb_select.isChecked = isSelected
-            itemView.cb_select.setOnCheckedChangeListener { buttonView, isChecked ->
-                itemActionListener?.onCheckedChanged(isChecked, itemView.tv_label_name.text.toString())
-            }
-            itemView.setOnClickListener {
-                itemActionListener?.onClickListener(itemView.tv_label_name.text.toString())
-            }
+            with(itemView, {
+                tv_label_name.text = label
+                cb_select.isChecked = isSelected
+                cb_select.setOnCheckedChangeListener { buttonView, isChecked ->
+                    itemActionListener?.onCheckedChanged(isChecked, tv_label_name.text.toString())
+                }
+                setOnClickListener {
+                    itemActionListener?.onClickListener(tv_label_name.text.toString())
+                }
+            })
         }
 
         internal interface ItemActionListener {

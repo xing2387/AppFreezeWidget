@@ -33,5 +33,6 @@
         android:singleLine="true"
         android:textColor="@android:color/darker_gray"
         android:textSize="12sp"
+        android:translationY="-5dp"
         tools:text="微信" />
 </RelativeLayout>

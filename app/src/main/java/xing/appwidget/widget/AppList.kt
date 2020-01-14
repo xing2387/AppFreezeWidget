@@ -10,11 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_configure_app_linear.view.*
 import xing.appwidget.R
-import xing.appwidget.bean.PackageFilterParam
 import xing.appwidget.bean.AppInfo
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 class AppList : RecyclerView {
 
@@ -189,13 +185,15 @@ internal class AppInfoHolder(context: Context, parent: ViewGroup?, isGrid: Boole
         if (appInfo == null) {
             return
         }
-        itemView.iv_icon.setImageDrawable(appInfo.appIcon)
-        itemView.tv_name.text = appInfo.appName
-        itemView.cb_check.isChecked = isChecked
-        itemView.tv_package_name?.text = appInfo.packageName
+        with(itemView, {
+            iv_icon.setImageDrawable(appInfo.appIcon)
+            tv_name.text = appInfo.appName
+            cb_check.isChecked = isChecked
+            tv_package_name?.text = appInfo.packageName
+            val colorResId = if (appInfo.enabled) R.color.bg_enabled else R.color.bg_disabled
+            setBackgroundColor(context.resources.getColor(colorResId))
+        })
         itemView.setOnClickListener(this)
-        val colorResId = if (appInfo.enabled) R.color.bg_enabled else R.color.bg_disabled
-        itemView.setBackgroundColor(itemView.context.resources.getColor(colorResId))
     }
 
     override fun onClick(v: View?) {
